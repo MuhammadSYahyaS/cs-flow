@@ -5,6 +5,7 @@ import config as c
 from model import FeatureExtractor
 from utils import *
 import os
+from pathlib import Path
 
 
 def extract(train_loader, test_loader, class_name):
@@ -24,18 +25,19 @@ def extract(train_loader, test_loader, class_name):
 
             for i_f, f in enumerate(features):
                 f = np.concatenate(f, axis=0)
-                np.save(export_dir + class_name + '_scale_' + str(i_f) + '_' + name, f)
+                np.save(os.path.join(export_dir, class_name + '_scale_' + str(i_f) + '_' + name), f)
             if name == 'test':
                 labels = np.concatenate(labels)
-                np.save(export_dir + class_name + '_labels', labels)
+                np.save(os.path.join(export_dir, class_name + '_labels'), labels)
 
 
 export_name = c.class_name
-export_dir = 'data/features/' + export_name + '/'
+# export_dir = 'data/features/' + export_name + '/'
+export_dir = os.path.join(Path(c.dataset_path).parent, "features", export_name)
 c.pre_extracted = False
 os.makedirs(export_dir, exist_ok=True)
 train_set, test_set = load_datasets(c.dataset_path, c.class_name)
 train_loader, test_loader = make_dataloaders(train_set, test_set)
 extract(train_loader, test_loader, c.class_name)
 paths = [p for p, l in test_set.samples]
-np.save(export_dir + c.class_name + '_image_paths.npy', paths)
+np.save(os.path.join(export_dir, c.class_name + '_image_paths.npy'), paths)

@@ -5,6 +5,7 @@ import config as c
 from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 import numpy as np
+from pathlib import Path
 
 
 def t2np(tensor):
@@ -100,7 +101,7 @@ def load_datasets(dataset_path, class_name):
 
 
 class FeatureDataset(Dataset):
-    def __init__(self, root="data/features/" + c.class_name + '/', n_scales=c.n_scales, train=False):
+    def __init__(self, root=os.path.join(Path(c.dataset_path).parent, "features", c.class_name), n_scales=c.n_scales, train=False):
 
         super(FeatureDataset, self).__init__()
         self.data = list()
@@ -109,7 +110,7 @@ class FeatureDataset(Dataset):
         suffix = 'train' if train else 'test'
 
         for s in range(c.n_scales):
-            self.data.append(np.load(root + c.class_name + '_scale_' + str(s) + '_' + suffix + '.npy'))
+            self.data.append(np.load(os.path.join(root, c.class_name + '_scale_' + str(s) + '_' + suffix + '.npy')))
 
         self.labels = np.load(os.path.join(root, c.class_name + '_labels.npy')) if not train else np.zeros(
             [len(self.data[0])])

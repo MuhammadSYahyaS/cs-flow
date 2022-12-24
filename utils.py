@@ -166,7 +166,7 @@ class Score_Observer:
     def update(self, score, epoch, print_score=False):
         self.last = score
         is_best = False
-        if epoch == 0 or score > self.max_score:
+        if self.max_score == None or score > self.max_score:
             self.max_score = score
             self.max_epoch = epoch
             is_best = True

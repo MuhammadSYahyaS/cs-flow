@@ -15,6 +15,8 @@ modelname = "03"  # export evaluations/logs with this name
 pre_extracted = True  # were feature preextracted with extract_features?
 
 img_size = (768, 768)  # image size of highest scale, others are //2, //4
+assert img_size[0] % 128 == 0 and img_size[1] % 128 == 0, "image width/height should be a multiple of 128"
+
 img_dims = [3] + list(img_size)
 
 # transformation settings

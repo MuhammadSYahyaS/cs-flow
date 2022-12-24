@@ -23,6 +23,7 @@ os.makedirs(map_export_dir, exist_ok=True)
 
 def compare_histogram(scores, classes, thresh=2.5, n_bins=64):
     classes = deepcopy(classes)
+    scores = deepcopy(scores)
     classes[classes > 0] = 1
     scores[scores > thresh] = thresh
     bins = np.linspace(np.min(scores), np.max(scores), n_bins)
@@ -181,7 +182,7 @@ def evaluate(model, test_loader):
                 likelihood_grouped = list()
                 for i in range(len(z)):
                     z_grouped.append(z[i].view(-1, *z[i].shape[1:]))
-                    likelihood_grouped.append(torch.mean(z_grouped[-1] ** 2, dim=(1,)) / c.n_feat)
+                    likelihood_grouped.append(torch.mean(z_grouped[-1] ** 2, dim=(1,)))
                 all_maps.extend(likelihood_grouped[0])
                 for i_l, l in enumerate(t2np(labels)):
                     # viz_maps([lg[i_l] for lg in likelihood_grouped], c.modelname + '_' + str(c.viz_sample_count), label=l, show_scales = 1)

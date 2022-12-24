@@ -2,14 +2,23 @@ import numpy as np
 import torch
 from tqdm import tqdm
 import config as c
-from model import FeatureExtractor
+from model import FeatureExtractor, FeatureExtractorResNet, FeatureExtractorMobileNet
 from utils import *
 import os
 from pathlib import Path
 
 
 def extract(train_loader, test_loader, class_name):
-    model = FeatureExtractor()
+    if c.extractor == "effnetB5":
+        print("Using effnetB5")
+        model = FeatureExtractor()
+    elif c.extractor == "resnet34":
+        print("Using resnet34")
+        model = FeatureExtractorResNet()
+    elif c.extractor == "ssd_mobilenet_v3_large":
+        model = FeatureExtractorMobileNet()
+    else:
+        raise NotImplementedError("'%s' is not implemented" % c.extractor)
     model.to(c.device)
     model.eval()
     with torch.no_grad():

@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from sklearn.metrics import roc_auc_score, roc_curve, auc, average_precision_score, precision_recall_curve
 from tqdm import tqdm
-from model import load_model, FeatureExtractor
+from model import load_model, FeatureExtractor, FeatureExtractorResNet, FeatureExtractorMobileNet
 import config as c
 from utils import *
 import matplotlib.pyplot as plt
@@ -146,7 +146,14 @@ def evaluate(model, test_loader):
     model.to(c.device)
     model.eval()
     if not c.pre_extracted:
-        fe = FeatureExtractor()
+        if c.extractor == "effnetB5":
+            fe = FeatureExtractor()
+        elif c.extractor == "resnet34":
+            fe = FeatureExtractorResNet()
+        elif c.extractor == "ssd_mobilenet_v3_large":
+            fe = FeatureExtractorMobileNet()
+        else:
+            raise NotImplementedError("'%s' is not implemented" % c.extractor)
         fe.eval()
         fe.to(c.device)
         for param in fe.parameters():

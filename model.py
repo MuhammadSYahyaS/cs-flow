@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from efficientnet_pytorch import EfficientNet
+from torchvision.models import resnet34, mobilenet_v3_large
 import config as c
 from freia_funcs import *
 
@@ -64,6 +65,50 @@ class FeatureExtractor(nn.Module):
             y.append(feat_s)
         return y
 
+class FeatureExtractorResNet(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.feature_extractor = resnet34(pretrained=True)
+    
+    def res_ext(self, x):
+        x = self.feature_extractor.conv1(x)
+        x = self.feature_extractor.bn1(x)
+        x = self.feature_extractor.relu(x)
+        x = self.feature_extractor.maxpool(x)
+
+        x = self.feature_extractor.layer1(x)
+        x = self.feature_extractor.layer2(x)
+        x = self.feature_extractor.layer3(x)
+        return x
+        
+    def forward(self, x):
+        y = list()
+        for s in range(c.n_scales):
+            feat_s = F.interpolate(x, size=(c.img_size[0] // (2 ** s), c.img_size[1] // (2 ** s))) if s > 0 else x
+            feat_s = self.res_ext(feat_s)
+
+            y.append(feat_s)
+        return y
+
+class FeatureExtractorMobileNet(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.feature_extractor = mobilenet_v3_large(pretrained=True)
+    
+    def mob_ext(self, x, use_layer=14):
+        for idx, m in enumerate(self.feature_extractor.features.children()):
+            x = m(x)
+            if idx >= use_layer:
+                return x
+    def forward(self, x):
+        y = list()
+        for s in range(c.n_scales):
+            feat_s = F.interpolate(x, size=(c.img_size[0] // (2 ** s), c.img_size[1] // (2 ** s))) if s > 0 else x
+            # feat_s = self.feature_extractor.features(feat_s)
+            feat_s = self.mob_ext(feat_s)
+
+            y.append(feat_s)
+        return y
 
 def save_model(model, filename):
     if not os.path.exists(MODEL_DIR):

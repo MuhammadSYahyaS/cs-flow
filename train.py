@@ -3,7 +3,7 @@ import torch
 from sklearn.metrics import roc_auc_score
 from tqdm import tqdm
 import config as c
-from model import get_cs_flow_model, save_model, FeatureExtractor, nf_forward
+from model import get_cs_flow_model, save_model, FeatureExtractor, FeatureExtractorResNet, FeatureExtractorMobileNet, nf_forward
 from utils import *
 
 
@@ -12,7 +12,14 @@ def train(train_loader, test_loader):
     optimizer = torch.optim.Adam(model.parameters(), lr=c.lr_init, eps=1e-04, weight_decay=1e-5)
     model.to(c.device)
     if not c.pre_extracted:
-        fe = FeatureExtractor()
+        if c.extractor == "effnetB5":
+            fe = FeatureExtractor()
+        elif c.extractor == "resnet34":
+            fe = FeatureExtractorResNet()
+        elif c.extractor == "ssd_mobilenet_v3_large":
+            fe = FeatureExtractorMobileNet()
+        else:
+            raise NotImplementedError("'%s' is not implemented" % c.extractor)
         fe.eval()
         fe.to(c.device)
         for param in fe.parameters():
